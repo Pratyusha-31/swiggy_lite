@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 // Supabase credentials
 const String supabaseUrl = 'https://ybboqfjmnyxiraqvqyff.supabase.co';
@@ -1127,7 +1128,8 @@ class _AdminMenuTabState extends State<AdminMenuTab> {
   bool _isVeg = true;
   String? _imageUrl;
   bool _uploading = false;
-  XFile? _pickedImage;
+XFile? _pickedImage;
+  Uint8List? _imageBytes;
 
   @override
   void initState() {
@@ -1152,14 +1154,16 @@ class _AdminMenuTabState extends State<AdminMenuTab> {
 
   Future<void> _pickAndUpload() async {
     final picker = ImagePicker();
-    final picked =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
-    if (picked == null) return;
+  final picked =
+      await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+  if (picked == null) return;
 
-    setState(() {
-      _pickedImage = picked;
-      _uploading = true;
-    });
+  final bytes = await picked.readAsBytes();
+  setState(() {
+    _pickedImage = picked;
+    _imageBytes = bytes;
+    _uploading = true;
+  });
 
     try {
       final bytes = await picked.readAsBytes();
@@ -1208,7 +1212,8 @@ class _AdminMenuTabState extends State<AdminMenuTab> {
       _selectedCategory = kCategories.first;
       _isVeg = true;
       _imageUrl = null;
-      _pickedImage = null;
+_pickedImage = null;
+      _imageBytes = null;
     });
     _load();
     if (mounted) {
@@ -1470,8 +1475,7 @@ class _AdminMenuTabState extends State<AdminMenuTab> {
                                 child: CircularProgressIndicator(
                                     color: kOrange, strokeWidth: 2))
                             : _pickedImage != null
-                                ? Image.file(File(_pickedImage!.path),
-                                    fit: BoxFit.cover)
+? Image.memory(_imageBytes!, fit: BoxFit.cover)
                                 : _imageUrl != null &&
                                         _imageUrl!.isNotEmpty
                                     ? Image.network(_imageUrl!,
