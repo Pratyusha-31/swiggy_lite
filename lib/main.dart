@@ -38,33 +38,31 @@ const List<String> kCategories = [
   'Other',
 ];
 
-// Default image keywords by category / name for auto-suggestion
+// Default images by category - user-provided stable food links
 const Map<String, String> kDefaultImages = {
-  'biryani':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Hyderabadi_dum_biryani.jpg/320px-Hyderabadi_dum_biryani.jpg',
-  'rice':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Fried_rice_-_stonesoup.jpg/320px-Fried_rice_-_stonesoup.jpg',
-  'burger':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/240px-PNG_transparency_demonstration_1.png',
-  'pizza':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Eq_it-na_pizza-margherita_sep2005_sml.jpg/320px-Eq_it-na_pizza-margherita_sep2005_sml.jpg',
-  'breakfast':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Spaghetti_Bolognese_mit_Parmesan_oder_Grana_Padano.jpg/320px-Spaghetti_Bolognese_mit_Parmesan_oder_Grana_Padano.jpg',
-  'drink':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Biryani_in_dum_style.jpg/320px-Biryani_in_dum_style.jpg',
-  'snack':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Croissant_with_butter.jpg/320px-Croissant_with_butter.jpg',
-  'dessert':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Above_Gotham.jpg/320px-Above_Gotham.jpg',
-  'noodle':
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Good_Food_Display_-_NCI_Visuals_Online.jpg/320px-Good_Food_Display_-_NCI_Visuals_Online.jpg',
+  'biryani': 'https://cdn.pixabay.com/photo/2019/11/04/12/16/rice-4601049_1280.jpg',
+  'burgers': 'https://cdn.pixabay.com/photo/2016/03/05/19/02/hamburger-1238246_1280.jpg',
+  'pizza': 'https://cdn.pixabay.com/photo/2017/12/10/14/47/pizza-3010062_1280.jpg',
+  'breakfast': 'https://cdn.pixabay.com/photo/2016/11/06/23/31/breakfast-1804457_1280.jpg',
+  'desserts': 'https://cdn.pixabay.com/photo/2016/10/31/18/14/dessert-1786311_1280.jpg',
+  'drinks': 'https://images.pexels.com/photos/1283219/pexels-photo-1283219.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'snacks': 'https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&cs=tinysrgb&w=800',
+'rice': 'https://images.pexels.com/photos/723198/pexels-photo-723198.jpeg',
+  'noodles': 'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'sandwiches': 'https://images.pexels.com/photos/1633526/pexels-photo-1633526.jpeg?auto=compress&cs=tinysrgb&w=800',
+'thali': 'https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg',
+  'soups': 'https://images.pexels.com/photos/1731535/pexels-photo-1731535.jpeg?auto=compress&cs=tinysrgb&w=800',
+  'other': 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
 };
 
 String? getDefaultImageUrl(String name, String category) {
+  final catLower = category.toLowerCase();
+  if (kDefaultImages.containsKey(catLower)) {
+    return kDefaultImages[catLower];
+  }
   final lower = name.toLowerCase();
-  final cat = category.toLowerCase();
   for (final key in kDefaultImages.keys) {
-    if (lower.contains(key) || cat.contains(key)) {
+    if (lower.contains(key) || catLower.contains(key)) {
       return kDefaultImages[key];
     }
   }
@@ -1130,6 +1128,7 @@ class _AdminMenuTabState extends State<AdminMenuTab> {
   bool _uploading = false;
 XFile? _pickedImage;
   Uint8List? _imageBytes;
+  bool _manualImageSelected = false;
 
   @override
   void initState() {
@@ -1140,10 +1139,11 @@ XFile? _pickedImage;
   }
 
   void _onNameChanged() {
-    final suggested =
-        getDefaultImageUrl(_nameCtrl.text, _selectedCategory);
-    if (suggested != null && (_imageUrl == null || _imageUrl!.isEmpty)) {
-      setState(() => _imageUrl = suggested);
+    if (!_manualImageSelected && (_imageUrl == null || _imageUrl!.isEmpty)) {
+      final suggested = getDefaultImageUrl(_nameCtrl.text, _selectedCategory);
+      if (suggested != null) {
+        setState(() => _imageUrl = suggested);
+      }
     }
   }
 
@@ -1180,6 +1180,7 @@ XFile? _pickedImage;
           .getPublicUrl(fileName);
       setState(() {
         _imageUrl = url;
+        _manualImageSelected = true;
         _uploading = false;
       });
     } catch (e) {
@@ -1212,8 +1213,8 @@ XFile? _pickedImage;
       _selectedCategory = kCategories.first;
       _isVeg = true;
       _imageUrl = null;
+      _manualImageSelected = false;
 _pickedImage = null;
-      _imageBytes = null;
     });
     _load();
     if (mounted) {
@@ -1328,10 +1329,12 @@ _pickedImage = null;
                   onChanged: (val) {
                     setState(() {
                       _selectedCategory = val!;
-                      // Auto suggest image on category change too
-                      final suggested = getDefaultImageUrl(
-                          _nameCtrl.text, _selectedCategory);
-                      if (suggested != null) _imageUrl = suggested;
+                      // Auto suggest image on category change too (manual priority)
+                      if (!_manualImageSelected) {
+                        final suggested = getDefaultImageUrl(
+                            _nameCtrl.text, _selectedCategory);
+                        if (suggested != null) _imageUrl = suggested;
+                      }
                     });
                   },
                 ),

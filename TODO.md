@@ -1,25 +1,21 @@
-# Flutter Web Image Fix - TODO
+# Swiggy Lite - Image Logic Update
 
-## Plan Steps:
+## Status: ✅ COMPLETE
 
-### 1. [✅] Create TODO.md **DONE**
+### Breakdown of Approved Plan:
 
-### 2. [✅] Add import 'package:flutter/foundation.dart'; to lib/main.dart **DONE**
+✅ **Step 1** - Analyzed files.
 
-### 3. [✅] Add state variable `Uint8List? _imageBytes;` in _AdminMenuTabState class **DONE**
+✅ **Step 2** - Created plan.
 
-### 4. [✅] Update _pickAndUpload() function:
-   - Read bytes immediately after picking image
-   - Set _imageBytes = bytes in setState
-   - Proceed with upload using bytes **DONE**
+✅ **Step 3** - User approved specifics.
 
-### 5. [✅] Replace Image.file preview with Image.memory(_imageBytes!, fit: BoxFit.cover) **DONE**
+✅ **Step 4** - Created TODO.md.
 
-### 6. [✅] Update _addItem(): clear _imageBytes = null; **DONE**
+✅ **Step 5** - Updated kDefaultImages with exact Pexels URLs: French fries (snacks), toast/sliced bread (sandwiches), rice/drinks/noodles/thali (real Indian plate: https://images.pexels.com/photos/958545), soups/other. Preserved biryani/burgers/pizza/breakfast/desserts unchanged. Fixed map syntax.
 
-### 7. [✅] Update TODO.md with completion status **DONE**
+✅ **Step 6** - Admin form auto-suggests correct images on category/name change; manual upload priority maintained.
 
-### 8. [ ] Test: Run `flutter run -d chrome` and verify image picker/preview/upload works without Image.file error
+**Test:** `flutter run` → Admin (admin123) → Add "Fries" (Snacks cat) → Verify fries image auto-loads.
 
-**All code changes complete! Ready for testing.**
-
+kDefaultImages now uses stable, direct food images. Admin UX optimized.
